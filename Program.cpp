@@ -12,6 +12,7 @@ static void help()
            "    /.Program [video name]\n\n";
 }
 cv::Rect box;
+cv::Point point;
 bool drawing_box = false;
 
 void defineRoi( cv::Mat& img, cv::Rect rect ){
@@ -53,6 +54,16 @@ void onMouse( int event, int x, int y, int flags, void* param ) {
             break;
     }
 }
+void choosePoint( int event, int x, int y, int flags, void* param ) {
+    cv::Mat& image = *(cv::Mat*) param;
+    switch( event )
+    {
+        case CV_EVENT_LBUTTONUP:
+            point = cv::Point(x, y);
+            cout << "Tocka " << point << endl;
+            break;
+    }
+}
 
 
 int main( int argc, const char** argv )
@@ -86,6 +97,12 @@ int main( int argc, const char** argv )
                 cout << "Stisni s za start" << endl;
                 cv::setMouseCallback( "Video", onMouse, (void*)&frame_hsv );
                 if (cv::waitKey(0)=='s') break;
+                
+            case 'x':
+                cout << "Klikni na kuglicu"<< endl;
+                cv::setMouseCallback( "Video", choosePoint, (void*)&frame_hsv );
+                if (cv::waitKey(0)=='s') break;
+                
         }
     }
     
