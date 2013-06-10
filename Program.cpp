@@ -59,8 +59,13 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
     switch( event )
     {
         case CV_EVENT_LBUTTONUP:
-            point = cv::Point(x, y);
+            point.x = x;
+            point.y = y;
             cout << "Tocka " << point << endl;
+            // Kod pristupanja elementu bitno je Napravit objekt tipa
+            // Vec3b koji je zapravo vektor s tri unsinged int člana
+            cv::Vec3b elem = image.at<cv::Vec3b>(x,y);
+            cout << elem << endl;
             break;
     }
 }
