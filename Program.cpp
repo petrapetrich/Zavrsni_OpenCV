@@ -12,16 +12,43 @@ cv::Vec3b hsv_value;
 bool drawing_box = false;
 bool setRoi = false;
 bool setPosition = true;
+cv::Mat imgroi;
 
 void help(){
     cout <<  "    /.Program [video name]\n\n";
 }
+
+int averageValue (){
+    
+    int value = 0;
+    int brojac = 0;
+    int avgValue;
+    int i, j;
+    
+    for (i=0; i<=imgroi.rows; i++){
+        for (j=0; j<imgroi.cols; j++){
+            
+            value += imgroi.at<uint8_t>(i,j) ;
+            brojac ++ ; }}
+    
+    avgValue = value/brojac;
+    
+    cout << "Bok, maki!" << endl;
+    
+    return avgValue;
+    }   
+            
 
 void defineRoi( cv::Mat& img, cv::Rect rect ){
     cout << "crtam" << endl;
     cv::rectangle( img, rect.tl(), rect.br(), cv::Scalar(255,0,0), 1);
     imshow("Video", img);
     setRoi = true;
+    
+    imgroi = img (rect);
+    
+    int avgvalue = averageValue();
+    cout << "Ovo je srednja vrijednost" <<avgvalue << endl;
 
 } 
 
@@ -57,6 +84,7 @@ void onMouse( int event, int x, int y, int flags, void* param ) {
             break;
     }
 }
+
 void choosePoint( int event, int x, int y, int flags, void* param ) {
     cv::Mat& image = *(cv::Mat*) param;
     
@@ -88,6 +116,8 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
     }
     
 }*/
+
+
 
 int main( int argc, const char** argv )
 {
