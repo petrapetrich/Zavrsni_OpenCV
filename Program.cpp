@@ -6,19 +6,22 @@
 //using namespace cv;
 using namespace std;
 
-static void help()
-{
-    cout << "\nPerica perich i makija makich \n"
-           "    /.Program [video name]\n\n";
-}
 cv::Rect box;
-cv::Point point;
+cv::Point start, finish;
+cv::Vec3b hsv_value;
 bool drawing_box = false;
+bool setRoi = false;
+bool setPosition = true;
+
+void help(){
+    cout <<  "    /.Program [video name]\n\n";
+}
 
 void defineRoi( cv::Mat& img, cv::Rect rect ){
     cout << "crtam" << endl;
     cv::rectangle( img, rect.tl(), rect.br(), cv::Scalar(255,0,0), 1);
     imshow("Video", img);
+    setRoi = true;
 
 } 
 
@@ -56,20 +59,35 @@ void onMouse( int event, int x, int y, int flags, void* param ) {
 }
 void choosePoint( int event, int x, int y, int flags, void* param ) {
     cv::Mat& image = *(cv::Mat*) param;
-    switch( event )
-    {
-        case CV_EVENT_LBUTTONUP:
-            point.x = x;
-            point.y = y;
-            cout << "Tocka " << point << endl;
-            // Kod pristupanja elementu bitno je Napravit objekt tipa
-            // Vec3b koji je zapravo vektor s tri unsinged int člana
-            cv::Vec3b elem = image.at<cv::Vec3b>(x,y);
-            cout << elem << endl;
-            break;
+    
+    if ((event == CV_EVENT_LBUTTONUP)&& (setPosition == true)){
+      
+            start.x = x;
+            start.y = y;
+            cout << "Tocka pocetka" << start << endl;
+            setPosition = false;
     }
+        
+    if ((event == CV_EVENT_LBUTTONDOWN) && (setPosition == false)){
+        
+        finish.x = x;
+        finish.y = y;
+        cout << "Tocka kraja: " << finish << endl;
+        
+        }
+    
+    
 }
 
+/*void comparePixelValues( cv::Mat& img ){
+    Mat roi = (img, box);
+    for(int i=0; i<=box.width; i++){
+        for(int j=0; j<=box.height; j++){
+            roi.at<
+        }
+    }
+    
+}*/
 
 int main( int argc, const char** argv )
 {
@@ -79,35 +97,39 @@ int main( int argc, const char** argv )
     if(argc > 1) cap.open(string(argv[1]));
     else {
         cout << "Ucitavam zadani video" << endl;
-        cap.open("/media/petrich-wd/Faks/Zavrsni rad/Snimke/MVI_0810.MOV");      
+        cap.open("/media/petrich-wd/Faks/Zavrsni rad/Snimke/nove/MVI_0067.MOV");      
     }
     
-    cv::Mat frame, frame_hsv;
+    cv::Mat frame, frame_gray;
     cv::namedWindow("Video", 1);
     
     for(;;){
         cap >> frame;
-        cv::cvtColor(frame,frame_hsv,CV_BGR2HSV);
-        if(!frame_hsv.data) break;
-        cv::imshow("Video", frame_hsv);
+        cv::cvtColor(frame,frame_gray,CV_BGR2GRAY);
+        if(!frame_gray.data) break;
+        cv::imshow("Video", frame_gray);
                 
-        int c = cv::waitKey(15);
-        switch( (char)c )
+        char c = cv::waitKey(15);
+        switch( c )
         {
             case 27:
                 cout << "Izlazim ... \n ";
                 return 0;
         
             case 'p':
-                cout << "Stisni s za start" << endl;
-                cv::setMouseCallback( "Video", onMouse, (void*)&frame_hsv );
+                cout << "Odaberi ROI pa stisni s za start" << endl;
+                cv::setMouseCallback( "Video", onMouse, (void*)&frame_gray );
                 if (cv::waitKey(0)=='s') break;
                 
             case 'x':
-                cout << "Klikni na kuglicu"<< endl;
-                cv::setMouseCallback( "Video", choosePoint, (void*)&frame_hsv );
+                cout << "Odaberi početak i kraj puta"<< endl;
+                cv::setMouseCallback( "Video", choosePoint, (void*)&frame_gray );
                 if (cv::waitKey(0)=='s') break;
-                
+                 
+        }
+        if ( setRoi && setPosition) {
+        cout << "Trazim piksele koji odgovaraju boji kuglice" << endl;
+        //comparePixelValues(frame_gray);
         }
     }
     
