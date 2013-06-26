@@ -13,6 +13,8 @@ bool drawing_box = false;
 bool setRoi = false;
 bool setPosition = true;
 cv::Mat imgroi;
+cv::Mat imgthresh;
+int avgValue;
 
 void help();
 int averageValue();
@@ -57,9 +59,10 @@ int main( int argc, const char** argv ){
                 if (cv::waitKey(0)=='s') break;
                  
         }
-        if ( setRoi && setPosition) {
-        cout << "Trazim piksele koji odgovaraju boji kuglice" << endl;
-        //comparePixelValues(frame_gray);
+        if (setRoi) {
+        //cout << "jel se izvrsim?"<<endl;
+        threshold(imgroi, imgthresh, avgValue-50, 255, 0);
+        imshow("roi", imgthresh);
         }
     }
     
@@ -74,7 +77,6 @@ int averageValue (){
     
     int value = 0;
     int brojac = 0;
-    int avgValue;
     int i, j;
     
     for (i=0; i<=imgroi.rows; i++){
@@ -85,18 +87,20 @@ int averageValue (){
     
     avgValue = value/brojac;
     return avgValue;
+    
+    
     }   
     
 void defineRoi( cv::Mat& img, cv::Rect rect ){
     cout << "Oznacen je ROI" << endl;
     cv::rectangle( img, rect.tl(), rect.br(), cv::Scalar(255,0,0), 1);
     imshow("Video", img);
-    setRoi = true;
-    
+    setRoi=true;
+  
     imgroi = img (rect);
     
-    int avgvalue = averageValue();
-    cout << "Ovo je srednja vrijednost:" <<avgvalue <<"\n"<< endl;
+    int avgValue = averageValue();
+    cout << "Ovo je srednja vrijednost:" <<avgValue <<"\n"<< endl;
 } 
 
 void onMouse( int event, int x, int y, int flags, void* param ) {
@@ -152,12 +156,4 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
         }  
 }
 
-/*void comparePixelValues( cv::Mat& img ){
-    Mat roi = (img, box);
-    for(int i=0; i<=box.width; i++){
-        for(int j=0; j<=box.height; j++){
-            roi.at<
-        }
-    }
-    
-}*/
+
