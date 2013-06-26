@@ -14,9 +14,61 @@ bool setRoi = false;
 bool setPosition = true;
 cv::Mat imgroi;
 
-void help(){
-    cout <<  "    /.Program [video name]\n\n";
+void help();
+int averageValue();
+void defineRoi( cv::Mat& img, cv::Rect rect);
+void onMouse(int event, int x, int y, int flags, void*param);
+void choosePoint(int event, int x, int y, int flags, void* param);
+
+
+int main( int argc, const char** argv ){
+    help();
+    cv::VideoCapture cap;
+    if(argc > 1) cap.open(string(argv[1]));
+    else {
+        cout << "Ucitavam zadani video. \n Pritisni p za pauzu.\n" << endl;
+        cap.open("/media/petrich-wd/Faks/Zavrsni rad/Snimke/nove/MVI_0067.MOV");      
+    }
+    
+    cv::Mat frame, frame_gray;
+    cv::namedWindow("Video", 1);
+    
+    for(;;){
+        cap >> frame;
+        cv::cvtColor(frame,frame_gray,CV_BGR2GRAY);
+        if(!frame_gray.data) break;
+        cv::imshow("Video", frame_gray);
+                
+        char c = cv::waitKey(15);
+        switch( c )
+        {
+            case 27:
+                cout << "Izlazim ... \n ";
+                return 0;
+        
+            case 'p':
+                cout << "Odaberi ROI misem te odaberi s za odabir početka i kraja puta\n"<<endl;
+                cv::setMouseCallback( "Video", onMouse, (void*)&frame_gray );
+                if (cv::waitKey(0)=='s') break;
+                
+            case 'x':
+                cout << "Odaberi početak i kraj puta te pritisni s za start videa."<< endl;
+                cv::setMouseCallback( "Video", choosePoint, (void*)&frame_gray );
+                if (cv::waitKey(0)=='s') break;
+                 
+        }
+        if ( setRoi && setPosition) {
+        cout << "Trazim piksele koji odgovaraju boji kuglice" << endl;
+        //comparePixelValues(frame_gray);
+        }
+    }
+    
+    return 0;
+    
 }
+
+void help(){
+    cout <<  "Putanja za odabir videa:\n  /.Program [video name]\n\n";}
 
 int averageValue (){
     
@@ -32,15 +84,11 @@ int averageValue (){
             brojac ++ ; }}
     
     avgValue = value/brojac;
-    
-    cout << "Bok, maki!" << endl;
-    
     return avgValue;
     }   
-            
-
+    
 void defineRoi( cv::Mat& img, cv::Rect rect ){
-    cout << "crtam" << endl;
+    cout << "Oznacen je ROI" << endl;
     cv::rectangle( img, rect.tl(), rect.br(), cv::Scalar(255,0,0), 1);
     imshow("Video", img);
     setRoi = true;
@@ -48,8 +96,7 @@ void defineRoi( cv::Mat& img, cv::Rect rect ){
     imgroi = img (rect);
     
     int avgvalue = averageValue();
-    cout << "Ovo je srednja vrijednost" <<avgvalue << endl;
-
+    cout << "Ovo je srednja vrijednost:" <<avgvalue <<"\n"<< endl;
 } 
 
 void onMouse( int event, int x, int y, int flags, void* param ) {
@@ -77,7 +124,7 @@ void onMouse( int event, int x, int y, int flags, void* param ) {
                 box.height*=-1;
             }
             defineRoi(image, box );
-            cout << "box coordinates \n" 
+            cout << "Koordinate ROI \n" 
                 << "x\t y\t height\t width\n"
                 << box.x << "\t" << box.y << "\t" 
                 << box.height << "\t" << box.width << "\n";
@@ -92,7 +139,7 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
       
             start.x = x;
             start.y = y;
-            cout << "Tocka pocetka" << start << endl;
+            cout << "\nTocka pocetka:" << start << endl;
             setPosition = false;
     }
         
@@ -100,11 +147,9 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
         
         finish.x = x;
         finish.y = y;
-        cout << "Tocka kraja: " << finish << endl;
+        cout << "\nTocka kraja: " << finish << endl;
         
-        }
-    
-    
+        }  
 }
 
 /*void comparePixelValues( cv::Mat& img ){
@@ -116,53 +161,3 @@ void choosePoint( int event, int x, int y, int flags, void* param ) {
     }
     
 }*/
-
-
-
-int main( int argc, const char** argv )
-{
-    help();
-    
-    cv::VideoCapture cap;
-    if(argc > 1) cap.open(string(argv[1]));
-    else {
-        cout << "Ucitavam zadani video" << endl;
-        cap.open("/media/petrich-wd/Faks/Zavrsni rad/Snimke/nove/MVI_0067.MOV");      
-    }
-    
-    cv::Mat frame, frame_gray;
-    cv::namedWindow("Video", 1);
-    
-    for(;;){
-        cap >> frame;
-        cv::cvtColor(frame,frame_gray,CV_BGR2GRAY);
-        if(!frame_gray.data) break;
-        cv::imshow("Video", frame_gray);
-                
-        char c = cv::waitKey(15);
-        switch( c )
-        {
-            case 27:
-                cout << "Izlazim ... \n ";
-                return 0;
-        
-            case 'p':
-                cout << "Odaberi ROI pa stisni s za start" << endl;
-                cv::setMouseCallback( "Video", onMouse, (void*)&frame_gray );
-                if (cv::waitKey(0)=='s') break;
-                
-            case 'x':
-                cout << "Odaberi početak i kraj puta"<< endl;
-                cv::setMouseCallback( "Video", choosePoint, (void*)&frame_gray );
-                if (cv::waitKey(0)=='s') break;
-                 
-        }
-        if ( setRoi && setPosition) {
-        cout << "Trazim piksele koji odgovaraju boji kuglice" << endl;
-        //comparePixelValues(frame_gray);
-        }
-    }
-    
-    return 0;
-    
-}
