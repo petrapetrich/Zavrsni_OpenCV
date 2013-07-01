@@ -14,6 +14,7 @@ bool setRoi = false;
 bool setPosition = true;
 cv::Mat imgroi;
 cv::Mat imgthresh;
+
 int avgValue;
 
 void help();
@@ -26,6 +27,7 @@ void choosePoint(int event, int x, int y, int flags, void* param);
 int main( int argc, const char** argv ){
     help();
     cv::VideoCapture cap;
+
     if(argc > 1) cap.open(string(argv[1]));
     else {
         cout << "Ucitavam zadani video. \n Pritisni p za pauzu.\n" << endl;
@@ -60,10 +62,39 @@ int main( int argc, const char** argv ){
                  
         }
         if (setRoi) {
-        //cout << "jel se izvrsim?"<<endl;
-        threshold(imgroi, imgthresh, avgValue-50, 255, 0);
+        cv::threshold(imgroi, imgthresh, avgValue-60, 255, 0);
         imshow("roi", imgthresh);
+        cv::Mat imgcont = cv::Mat::zeros(imgthresh.rows, imgthresh.cols, CV_8UC3);
+        
+        vector<vector<cv::Point> > contours;
+        vector<cv::Vec4i> hierarchy;
+        
+        imshow("roi", imgthresh);
+        cv::findContours(imgthresh, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE );
+        
+        int largestIndex = 0;
+        int largestContour = 0;
+        int secondLargestIndex = 0;
+        int secondLargestContour = 0;
+        for( int i = 0; i< contours.size(); i++ )
+        {
+            if(contours[i].size() > largestContour){
+                secondLargestContour = largestContour;
+                secondLargestIndex = largestIndex;
+                largestContour = contours[i].size();
+                largestIndex = i;
+            }else if(contours[i].size() > secondLargestContour){
+                secondLargestContour = contours[i].size();
+                secondLargestIndex = i;
+            }
+        }       
+
+        cv::Scalar color(255,0,0);
+        cv::drawContours(imgcont, contours, largestIndex, color, 1, 8);
+        imshow("kont1", imgcont);
         }
+        
+        
     }
     
     return 0;
